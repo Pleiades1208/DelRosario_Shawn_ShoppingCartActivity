@@ -9,7 +9,7 @@ I also used AI when I wanted to clean up how my program looks on the console. My
 There were also moments where I wasn’t sure about parts of the logic like calculating totals or handling repeated items in the cart, so I used AI to guide me through the structure. I made sure to understand everything before applying it.
 
 Prompts/questions I asked
-"How do I store multiple objects in an array and access their values in C#?"
-"How can I make console output look aligned and easier to read?"
-"How do I calculate totals using methods inside a class?"
-"How do I properly handle cart items when the same product is added again?"
+* "How do I store multiple objects in an array and access their values in C#?"
+* "How can I make console output look aligned and easier to read?"
+* "How do I calculate totals using methods inside a class?"
+* "How do I properly handle cart items when the same product is added again?"
