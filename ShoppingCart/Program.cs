@@ -119,12 +119,31 @@ namespace ShoppingCartSystem
 
                 Console.WriteLine("Item added to cart.");
 
+                Console.WriteLine("\nCART:");
+                for (int i = 0; i < cartIds.Length; i++)
+                {
+                    if (cartIds[i] == 0) break;
+
+                    for (int j = 0; j < products.Length; j++)
+                    {
+                        if (products[j].Id == cartIds[i])
+                        {
+                            Console.WriteLine($"{products[j].Name} x{cartQty[i]}");
+                        }
+                    }
+                }
+
                 Console.Write("\nAdd more? (Y/N): ");
                 choice = (Console.ReadLine() ?? "").Trim().ToUpper();
 
+                while (choice != "Y" && choice != "N")
+                {
+                    Console.Write("Enter Y or N: ");
+                    choice = (Console.ReadLine() ?? "").Trim().ToUpper();
+                }
+
             } while (choice != "N");
 
-            // ✅ NEW PART
             double total = 0;
 
             Console.WriteLine("\nRECEIPT:");
