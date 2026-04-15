@@ -174,7 +174,11 @@ namespace ShoppingCartSystem
 
             double finalTotal = total - discount;
 
-            Console.WriteLine($"Discount: Php {discount:N2}");
+            if (discount > 0)
+            {
+                Console.WriteLine($"Discount (10%): Php {discount:N2}");
+            }
+
             Console.WriteLine($"Final Total: Php {finalTotal:N2}");
 
             Console.WriteLine("\nUPDATED STOCK:");
