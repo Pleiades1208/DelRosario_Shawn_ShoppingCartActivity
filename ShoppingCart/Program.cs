@@ -163,6 +163,25 @@ namespace ShoppingCartSystem
                     }
                 }
             }
+
+            Console.WriteLine($"\nGrand Total: Php {total:N2}");
+
+            double discount = 0;
+            if (total >= 5000)
+            {
+                discount = total * 0.10;
+            }
+
+            double finalTotal = total - discount;
+
+            Console.WriteLine($"Discount: Php {discount:N2}");
+            Console.WriteLine($"Final Total: Php {finalTotal:N2}");
+
+            Console.WriteLine("\nUPDATED STOCK:");
+            for (int i = 0; i < products.Length; i++)
+            {
+                Console.WriteLine($"{products[i].Name,-10} {products[i].RemainingStock}");
+            }
         }
     }
 
