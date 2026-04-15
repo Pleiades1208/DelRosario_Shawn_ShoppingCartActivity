@@ -11,24 +11,32 @@ namespace ShoppingCartSystem
                 new Product(101, "Eggs", 230, 200),
                 new Product(102, "Bread", 75, 100),
                 new Product(103, "Milk", 150, 100),
-                new Product(104, "Chicken", 250, 200)
+                new Product(104, "Chicken", 250, 200),
+                new Product(105, "Pork", 330, 200),
+                new Product(106, "Beef", 450, 200),
+                new Product(107, "Sardines", 40, 250),
+                new Product(108, "Carrots", 80, 100),
+                new Product(109, "Garlic", 100, 100),
+                new Product(110, "Onions", 80, 100),
+                new Product(111, "Potato", 85, 100),
+                new Product(112, "Tomato", 70, 100)
             };
 
             int[] cartIds = new int[10];
             int[] cartQty = new int[10];
 
+            Console.WriteLine("ID     NAME        PRICE       STOCK");
+            for (int i = 0; i < products.Length; i++)
+            {
+                products[i].DisplayProduct();
+            }
+
             string choice = "Y";
 
             do
             {
-                Console.WriteLine("\nID     NAME        PRICE       STOCK");
-                for (int i = 0; i < products.Length; i++)
-                {
-                    products[i].DisplayProduct();
-                }
-
-                Console.Write("\nEnter product ID: ");
                 int inputId;
+                Console.Write("\nEnter product ID: ");
 
                 if (!int.TryParse(Console.ReadLine(), out inputId))
                 {
@@ -37,7 +45,6 @@ namespace ShoppingCartSystem
                 }
 
                 int index = -1;
-
                 for (int i = 0; i < products.Length; i++)
                 {
                     if (products[i].Id == inputId)
@@ -59,8 +66,8 @@ namespace ShoppingCartSystem
                     continue;
                 }
 
-                Console.Write("Enter quantity: ");
                 int qty;
+                Console.Write("Enter quantity: ");
 
                 if (!int.TryParse(Console.ReadLine(), out qty) || qty <= 0)
                 {
@@ -88,14 +95,23 @@ namespace ShoppingCartSystem
 
                 if (!exists)
                 {
+                    bool added = false;
+
                     for (int i = 0; i < cartIds.Length; i++)
                     {
                         if (cartIds[i] == 0)
                         {
                             cartIds[i] = inputId;
                             cartQty[i] = qty;
+                            added = true;
                             break;
                         }
+                    }
+
+                    if (!added)
+                    {
+                        Console.WriteLine("Cart is full.");
+                        continue;
                     }
                 }
 
@@ -104,9 +120,30 @@ namespace ShoppingCartSystem
                 Console.WriteLine("Item added to cart.");
 
                 Console.Write("\nAdd more? (Y/N): ");
-                choice = Console.ReadLine().ToUpper();
+                choice = (Console.ReadLine() ?? "").Trim().ToUpper();
 
-            } while (choice == "Y");
+            } while (choice != "N");
+
+            // ✅ NEW PART
+            double total = 0;
+
+            Console.WriteLine("\nRECEIPT:");
+            Console.WriteLine("NAME     PRICE    QTY    TOTAL");
+
+            for (int i = 0; i < cartIds.Length; i++)
+            {
+                if (cartIds[i] == 0) break;
+
+                for (int j = 0; j < products.Length; j++)
+                {
+                    if (products[j].Id == cartIds[i])
+                    {
+                        double itemTotal = products[j].GetItemTotal(cartQty[i]);
+                        Console.WriteLine($"{products[j].Name,-8} {products[j].Price,6:N2} x {cartQty[i],3} = {itemTotal,8:N2}");
+                        total += itemTotal;
+                    }
+                }
+            }
         }
     }
 
