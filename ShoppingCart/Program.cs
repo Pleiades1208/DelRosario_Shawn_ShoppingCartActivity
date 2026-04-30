@@ -118,7 +118,6 @@ namespace ShoppingCartSystem
             }
         }
 
-        // FIX 3: Clarified prompt, loops on invalid input instead of returning
         static void FilterByCategory(Product[] products)
         {
             string selectedCategory = "";
@@ -158,55 +157,64 @@ namespace ShoppingCartSystem
             }
         }
 
-        // FIX 2 & 4: Shows name + qty after adding, loops on invalid input instead of returning
         static void AddToCart(Product[] products, int[] cartIds, int[] cartQty)
         {
             DisplayMenu(products);
 
-            // Loop until valid product ID is entered
             int inputId = -1;
+            int index = -1;
+
             while (true)
             {
                 Console.Write("\nEnter product ID: ");
-                if (int.TryParse(Console.ReadLine(), out inputId)) break;
-                Console.WriteLine("Invalid input. Please enter a numeric product ID.");
-            }
-
-            int index = -1;
-            for (int i = 0; i < products.Length; i++)
-            {
-                if (products[i].Id == inputId)
+                if (!int.TryParse(Console.ReadLine(), out inputId))
                 {
-                    index = i;
-                    break;
+                    Console.WriteLine("Invalid input. Please enter a numeric product ID.");
+                    continue;
                 }
+
+                index = -1;
+                for (int i = 0; i < products.Length; i++)
+                {
+                    if (products[i].Id == inputId)
+                    {
+                        index = i;
+                        break;
+                    }
+                }
+
+                if (index == -1)
+                {
+                    Console.WriteLine("Product not found. Please try again.");
+                    continue;
+                }
+
+                if (products[index].RemainingStock == 0)
+                {
+                    Console.WriteLine("Out of stock. Please choose another product.");
+                    continue;
+                }
+
+                break;
             }
 
-            if (index == -1)
-            {
-                Console.WriteLine("Product not found.");
-                return;
-            }
-
-            if (products[index].RemainingStock == 0)
-            {
-                Console.WriteLine("Out of stock.");
-                return;
-            }
-
-            // Loop until valid quantity is entered
             int qty = -1;
             while (true)
             {
                 Console.Write("Enter quantity: ");
-                if (int.TryParse(Console.ReadLine(), out qty) && qty > 0) break;
-                Console.WriteLine("Invalid quantity. Please enter a positive number.");
-            }
+                if (!int.TryParse(Console.ReadLine(), out qty) || qty <= 0)
+                {
+                    Console.WriteLine("Invalid quantity. Please enter a positive number.");
+                    continue;
+                }
 
-            if (qty > products[index].RemainingStock)
-            {
-                Console.WriteLine($"Not enough stock available. Only {products[index].RemainingStock} left.");
-                return;
+                if (qty > products[index].RemainingStock)
+                {
+                    Console.WriteLine($"Not enough stock available. Only {products[index].RemainingStock} left. Try again.");
+                    continue;
+                }
+
+                break;
             }
 
             bool exists = false;
@@ -248,14 +256,12 @@ namespace ShoppingCartSystem
 
             products[index].RemainingStock -= qty;
 
-            // FIX 2: Show name and quantity in confirmation message
             if (exists)
                 Console.WriteLine($"Cart updated: {products[index].Name} — now {cartQty[cartIndex]} in cart.");
             else
                 Console.WriteLine($"{qty}x {products[index].Name} added to cart!");
         }
 
-        // FIX 1: Show message and return early if cart is empty
         static void CartMenu(Product[] products, int[] cartIds, int[] cartQty)
         {
             bool isEmpty = true;
@@ -313,7 +319,6 @@ namespace ShoppingCartSystem
             }
         }
 
-        // FIX 5: Added ID column to cart display
         static void ViewCart(Product[] products, int[] cartIds, int[] cartQty)
         {
             bool empty = true;
