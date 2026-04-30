@@ -71,7 +71,7 @@ namespace ShoppingCartSystem
                         break;
                     case "7":
                         running = false;
-                        Console.WriteLine("Goodbye!");
+                        Console.WriteLine("Thank you for shopping, do come again!");
                         break;
                     default:
                         Console.WriteLine("Invalid option. Please enter 1 to 7.");
@@ -118,31 +118,25 @@ namespace ShoppingCartSystem
             }
         }
 
+        // FIX 3: Clarified prompt, loops on invalid input instead of returning
         static void FilterByCategory(Product[] products)
         {
-            Console.WriteLine("\nSelect a category:");
-            Console.WriteLine("1. Food");
-            Console.WriteLine("2. Electronics");
-            Console.WriteLine("3. Clothing");
-            Console.Write("Choose an option: ");
-
-            string input = (Console.ReadLine() ?? "").Trim();
             string selectedCategory = "";
 
-            switch (input)
+            while (true)
             {
-                case "1":
-                    selectedCategory = "Food";
-                    break;
-                case "2":
-                    selectedCategory = "Electronics";
-                    break;
-                case "3":
-                    selectedCategory = "Clothing";
-                    break;
-                default:
-                    Console.WriteLine("Invalid category option.");
-                    return;
+                Console.WriteLine("\nSelect a category by entering its number:");
+                Console.WriteLine("1. Food");
+                Console.WriteLine("2. Electronics");
+                Console.WriteLine("3. Clothing");
+                Console.Write("Enter number: ");
+
+                string input = (Console.ReadLine() ?? "").Trim();
+
+                if (input == "1") { selectedCategory = "Food"; break; }
+                else if (input == "2") { selectedCategory = "Electronics"; break; }
+                else if (input == "3") { selectedCategory = "Clothing"; break; }
+                else Console.WriteLine("Invalid input. Please enter 1, 2, or 3 only.");
             }
 
             bool found = false;
@@ -164,17 +158,18 @@ namespace ShoppingCartSystem
             }
         }
 
+        // FIX 2 & 4: Shows name + qty after adding, loops on invalid input instead of returning
         static void AddToCart(Product[] products, int[] cartIds, int[] cartQty)
         {
             DisplayMenu(products);
 
-            int inputId;
-            Console.Write("\nEnter product ID: ");
-
-            if (!int.TryParse(Console.ReadLine(), out inputId))
+            // Loop until valid product ID is entered
+            int inputId = -1;
+            while (true)
             {
-                Console.WriteLine("Invalid input.");
-                return;
+                Console.Write("\nEnter product ID: ");
+                if (int.TryParse(Console.ReadLine(), out inputId)) break;
+                Console.WriteLine("Invalid input. Please enter a numeric product ID.");
             }
 
             int index = -1;
@@ -199,13 +194,13 @@ namespace ShoppingCartSystem
                 return;
             }
 
-            int qty;
-            Console.Write("Enter quantity: ");
-
-            if (!int.TryParse(Console.ReadLine(), out qty) || qty <= 0)
+            // Loop until valid quantity is entered
+            int qty = -1;
+            while (true)
             {
-                Console.WriteLine("Invalid quantity.");
-                return;
+                Console.Write("Enter quantity: ");
+                if (int.TryParse(Console.ReadLine(), out qty) && qty > 0) break;
+                Console.WriteLine("Invalid quantity. Please enter a positive number.");
             }
 
             if (qty > products[index].RemainingStock)
@@ -215,12 +210,14 @@ namespace ShoppingCartSystem
             }
 
             bool exists = false;
+            int cartIndex = -1;
 
             for (int i = 0; i < cartIds.Length; i++)
             {
                 if (cartIds[i] == inputId)
                 {
                     cartQty[i] += qty;
+                    cartIndex = i;
                     exists = true;
                     break;
                 }
@@ -236,6 +233,7 @@ namespace ShoppingCartSystem
                     {
                         cartIds[i] = inputId;
                         cartQty[i] = qty;
+                        cartIndex = i;
                         added = true;
                         break;
                     }
@@ -250,18 +248,28 @@ namespace ShoppingCartSystem
 
             products[index].RemainingStock -= qty;
 
+            // FIX 2: Show name and quantity in confirmation message
             if (exists)
-            {
-                Console.WriteLine("Cart updated.");
-            }
+                Console.WriteLine($"Cart updated: {products[index].Name} — now {cartQty[cartIndex]} in cart.");
             else
-            {
-                Console.WriteLine("Item added to cart.");
-            }
+                Console.WriteLine($"{qty}x {products[index].Name} added to cart!");
         }
 
+        // FIX 1: Show message and return early if cart is empty
         static void CartMenu(Product[] products, int[] cartIds, int[] cartQty)
         {
+            bool isEmpty = true;
+            for (int i = 0; i < cartIds.Length; i++)
+            {
+                if (cartIds[i] != 0) { isEmpty = false; break; }
+            }
+
+            if (isEmpty)
+            {
+                Console.WriteLine("\nYour cart is empty. Add some items first!");
+                return;
+            }
+
             bool inCart = true;
 
             while (inCart)
@@ -305,12 +313,13 @@ namespace ShoppingCartSystem
             }
         }
 
+        // FIX 5: Added ID column to cart display
         static void ViewCart(Product[] products, int[] cartIds, int[] cartQty)
         {
             bool empty = true;
 
             Console.WriteLine("\nCART:");
-            Console.WriteLine($"{"NAME",-12} {"QTY",5} {"PRICE",10} {"SUBTOTAL",10}");
+            Console.WriteLine($"{"ID",5} {"NAME",-12} {"QTY",5} {"PRICE",10} {"SUBTOTAL",10}");
 
             for (int i = 0; i < cartIds.Length; i++)
             {
@@ -321,7 +330,7 @@ namespace ShoppingCartSystem
                     if (products[j].Id == cartIds[i])
                     {
                         double subtotal = products[j].GetItemTotal(cartQty[i]);
-                        Console.WriteLine($"{products[j].Name,-12} {cartQty[i],5} {products[j].Price,10:N2} {subtotal,10:N2}");
+                        Console.WriteLine($"{products[j].Id,5} {products[j].Name,-12} {cartQty[i],5} {products[j].Price,10:N2} {subtotal,10:N2}");
                         empty = false;
                     }
                 }
