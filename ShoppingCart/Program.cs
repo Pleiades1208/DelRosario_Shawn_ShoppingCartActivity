@@ -4,6 +4,10 @@ namespace ShoppingCartSystem
 {
     class Program
     {
+        static int receiptCounter = 1;
+        static string[] orderHistory = new string[100];
+        static int orderCount = 0;
+
         static void Main(string[] args)
         {
             Product[] products = new Product[]
@@ -39,7 +43,8 @@ namespace ShoppingCartSystem
                 Console.WriteLine("3. Search Product by Name");
                 Console.WriteLine("4. Filter Products by Category");
                 Console.WriteLine("5. Cart Menu");
-                Console.WriteLine("6. Exit");
+                Console.WriteLine("6. View Order History");
+                Console.WriteLine("7. Exit");
                 Console.Write("Choose an option: ");
 
                 string menuInput = (Console.ReadLine() ?? "").Trim();
@@ -62,11 +67,14 @@ namespace ShoppingCartSystem
                         CartMenu(products, cartIds, cartQty);
                         break;
                     case "6":
+                        ViewOrderHistory();
+                        break;
+                    case "7":
                         running = false;
                         Console.WriteLine("Goodbye!");
                         break;
                     default:
-                        Console.WriteLine("Invalid option. Please enter 1 to 6.");
+                        Console.WriteLine("Invalid option. Please enter 1 to 7.");
                         break;
                 }
             }
@@ -263,7 +271,8 @@ namespace ShoppingCartSystem
                 Console.WriteLine("2. Update Item Quantity");
                 Console.WriteLine("3. Remove Item");
                 Console.WriteLine("4. Clear Cart");
-                Console.WriteLine("5. Back to Main Menu");
+                Console.WriteLine("5. Checkout");
+                Console.WriteLine("6. Back to Main Menu");
                 Console.Write("Choose an option: ");
 
                 string cartInput = (Console.ReadLine() ?? "").Trim();
@@ -283,10 +292,14 @@ namespace ShoppingCartSystem
                         ClearCart(products, cartIds, cartQty);
                         break;
                     case "5":
+                        Checkout(products, cartIds, cartQty);
+                        inCart = false;
+                        break;
+                    case "6":
                         inCart = false;
                         break;
                     default:
-                        Console.WriteLine("Invalid option. Please enter 1 to 5.");
+                        Console.WriteLine("Invalid option. Please enter 1 to 6.");
                         break;
                 }
             }
@@ -455,6 +468,131 @@ namespace ShoppingCartSystem
             }
 
             Console.WriteLine("Cart cleared.");
+        }
+
+        static void Checkout(Product[] products, int[] cartIds, int[] cartQty)
+        {
+            bool empty = true;
+            for (int i = 0; i < cartIds.Length; i++)
+            {
+                if (cartIds[i] != 0)
+                {
+                    empty = false;
+                    break;
+                }
+            }
+
+            if (empty)
+            {
+                Console.WriteLine("Your cart is empty. Nothing to checkout.");
+                return;
+            }
+
+            double total = 0;
+            string receiptNo = receiptCounter.ToString("D4");
+            string dateTime = DateTime.Now.ToString("MMMM dd, yyyy h:mm tt");
+
+            Console.WriteLine("\n===== RECEIPT =====");
+            Console.WriteLine($"Receipt No: {receiptNo}");
+            Console.WriteLine($"Date: {dateTime}");
+            Console.WriteLine($"\n{"NAME",-12} {"PRICE",8} {"QTY",5} {"TOTAL",10}");
+
+            for (int i = 0; i < cartIds.Length; i++)
+            {
+                if (cartIds[i] == 0) continue;
+
+                for (int j = 0; j < products.Length; j++)
+                {
+                    if (products[j].Id == cartIds[i])
+                    {
+                        double itemTotal = products[j].GetItemTotal(cartQty[i]);
+                        Console.WriteLine($"{products[j].Name,-12} {products[j].Price,8:N2} {cartQty[i],5} {itemTotal,10:N2}");
+                        total += itemTotal;
+                    }
+                }
+            }
+
+            Console.WriteLine($"\nGrand Total: Php {total:N2}");
+
+            double discount = 0;
+            if (total >= 5000)
+            {
+                discount = total * 0.10;
+                Console.WriteLine($"Discount (10%): Php {discount:N2}");
+            }
+
+            double finalTotal = total - discount;
+            Console.WriteLine($"Final Total: Php {finalTotal:N2}");
+
+            double payment = 0;
+            while (true)
+            {
+                Console.Write("Enter payment: Php ");
+
+                if (!double.TryParse(Console.ReadLine(), out payment) || payment <= 0)
+                {
+                    Console.WriteLine("Invalid payment amount.");
+                    continue;
+                }
+
+                if (payment < finalTotal)
+                {
+                    Console.WriteLine("Insufficient payment.");
+                    continue;
+                }
+
+                break;
+            }
+
+            double change = payment - finalTotal;
+            Console.WriteLine($"Payment: Php {payment:N2}");
+            Console.WriteLine($"Change: Php {change:N2}");
+
+            Console.WriteLine("\nLOW STOCK ALERT:");
+            bool anyLow = false;
+            for (int i = 0; i < products.Length; i++)
+            {
+                if (products[i].RemainingStock <= 5)
+                {
+                    Console.WriteLine($"{products[i].Name} has only {products[i].RemainingStock} stock left.");
+                    anyLow = true;
+                }
+            }
+            if (!anyLow)
+            {
+                Console.WriteLine("All products have sufficient stock.");
+            }
+
+            Console.WriteLine("\nUPDATED STOCK:");
+            for (int i = 0; i < products.Length; i++)
+            {
+                Console.WriteLine($"{products[i].Name,-10} {products[i].RemainingStock}");
+            }
+
+            orderHistory[orderCount] = $"Receipt #{receiptNo} - Final Total: Php {finalTotal:N2}";
+            orderCount++;
+            receiptCounter++;
+
+            for (int i = 0; i < cartIds.Length; i++)
+            {
+                cartIds[i] = 0;
+                cartQty[i] = 0;
+            }
+        }
+
+        static void ViewOrderHistory()
+        {
+            if (orderCount == 0)
+            {
+                Console.WriteLine("\nNo orders yet.");
+                return;
+            }
+
+            Console.WriteLine("\n===== ORDER HISTORY =====");
+            for (int i = 0; i < orderCount; i++)
+            {
+                Console.WriteLine(orderHistory[i]);
+            }
         }
     }
 }
