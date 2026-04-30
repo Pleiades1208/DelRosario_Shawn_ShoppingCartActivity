@@ -8,18 +8,22 @@ namespace ShoppingCartSystem
         {
             Product[] products = new Product[]
             {
-                new Product(101, "Eggs",     230, 200),
-                new Product(102, "Bread",     75, 100),
-                new Product(103, "Milk",     150, 100),
-                new Product(104, "Chicken",  250, 200),
-                new Product(105, "Pork",     330, 200),
-                new Product(106, "Beef",     450, 200),
-                new Product(107, "Sardines",  40, 250),
-                new Product(108, "Carrots",   80, 100),
-                new Product(109, "Garlic",   100, 100),
-                new Product(110, "Onions",    80, 100),
-                new Product(111, "Potato",    85, 100),
-                new Product(112, "Tomato",    70, 100)
+                new Product(101, "Eggs",     230, 200, "Food"),
+                new Product(102, "Bread",     75, 100, "Food"),
+                new Product(103, "Milk",     150, 100, "Food"),
+                new Product(104, "Chicken",  250, 200, "Food"),
+                new Product(105, "Pork",     330, 200, "Food"),
+                new Product(106, "Beef",     450, 200, "Food"),
+                new Product(107, "Sardines",  40, 250, "Food"),
+                new Product(108, "Carrots",   80, 100, "Food"),
+                new Product(109, "Garlic",   100, 100, "Food"),
+                new Product(110, "Onions",    80, 100, "Food"),
+                new Product(111, "Potato",    85, 100, "Food"),
+                new Product(112, "Tomato",    70, 100, "Food"),
+                new Product(113, "Keyboard", 750,  10, "Electronics"),
+                new Product(114, "Mouse",    500,  10, "Electronics"),
+                new Product(115, "T-Shirt",  299,  30, "Clothing"),
+                new Product(116, "Jeans",    799,  20, "Clothing")
             };
 
             int[] cartIds = new int[10];
@@ -33,8 +37,9 @@ namespace ShoppingCartSystem
                 Console.WriteLine("1. View Products");
                 Console.WriteLine("2. Add Item to Cart");
                 Console.WriteLine("3. Search Product by Name");
-                Console.WriteLine("4. Cart Menu");
-                Console.WriteLine("5. Exit");
+                Console.WriteLine("4. Filter Products by Category");
+                Console.WriteLine("5. Cart Menu");
+                Console.WriteLine("6. Exit");
                 Console.Write("Choose an option: ");
 
                 string menuInput = (Console.ReadLine() ?? "").Trim();
@@ -51,14 +56,17 @@ namespace ShoppingCartSystem
                         SearchProduct(products);
                         break;
                     case "4":
-                        CartMenu(products, cartIds, cartQty);
+                        FilterByCategory(products);
                         break;
                     case "5":
+                        CartMenu(products, cartIds, cartQty);
+                        break;
+                    case "6":
                         running = false;
                         Console.WriteLine("Goodbye!");
                         break;
                     default:
-                        Console.WriteLine("Invalid option. Please enter 1 to 5.");
+                        Console.WriteLine("Invalid option. Please enter 1 to 6.");
                         break;
                 }
             }
@@ -66,7 +74,7 @@ namespace ShoppingCartSystem
 
         static void DisplayMenu(Product[] products)
         {
-            Console.WriteLine("\nID     NAME        PRICE       STOCK");
+            Console.WriteLine("\nID     NAME        PRICE       STOCK    CATEGORY");
             for (int i = 0; i < products.Length; i++)
             {
                 products[i].DisplayProduct();
@@ -99,6 +107,52 @@ namespace ShoppingCartSystem
             if (!found)
             {
                 Console.WriteLine("No products found matching that name.");
+            }
+        }
+
+        static void FilterByCategory(Product[] products)
+        {
+            Console.WriteLine("\nSelect a category:");
+            Console.WriteLine("1. Food");
+            Console.WriteLine("2. Electronics");
+            Console.WriteLine("3. Clothing");
+            Console.Write("Choose an option: ");
+
+            string input = (Console.ReadLine() ?? "").Trim();
+            string selectedCategory = "";
+
+            switch (input)
+            {
+                case "1":
+                    selectedCategory = "Food";
+                    break;
+                case "2":
+                    selectedCategory = "Electronics";
+                    break;
+                case "3":
+                    selectedCategory = "Clothing";
+                    break;
+                default:
+                    Console.WriteLine("Invalid category option.");
+                    return;
+            }
+
+            bool found = false;
+            Console.WriteLine($"\nProducts in '{selectedCategory}':");
+            Console.WriteLine("ID     NAME        PRICE       STOCK");
+
+            for (int i = 0; i < products.Length; i++)
+            {
+                if (products[i].Category == selectedCategory)
+                {
+                    Console.WriteLine($"{products[i].Id,3}   {products[i].Name,-10}   {products[i].Price,8:N2}   {products[i].RemainingStock,5}");
+                    found = true;
+                }
+            }
+
+            if (!found)
+            {
+                Console.WriteLine("No products found in this category.");
             }
         }
 
@@ -404,4 +458,3 @@ namespace ShoppingCartSystem
         }
     }
 }
-    
